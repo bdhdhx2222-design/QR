@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR</title>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    function getParam(n){const url=new URL(window.location.href);return url.searchParams.get(n)||""}
+    const nameField=getParam("name");
+    const taxField=getParam("tax");
+    const totalField=getParam("total");
+    const dateField=getParam("date");
+    const otherField=getParam("other");
+    const qrContent=`${nameField}|${taxField}|${totalField}|${dateField}|${otherField}`;
+
+    var qrDiv=document.createElement("div");
+    new QRCode(qrDiv,{text:qrContent,width:350,height:350});
+
+    setTimeout(()=>{
+      const canvas=qrDiv.querySelector("canvas");
+      const pngURL=canvas.toDataURL("image/png");
+      document.body.innerHTML="";
+      const img=document.createElement("img");
+      img.src=pngURL;
+      document.body.appendChild(img);
+    },300);
+  </script>
+</body>
+</html>
