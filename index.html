@@ -1,1 +1,55 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR</title>
+  <style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    function getParam(n, d){ try { const url=new URL(window.location.href); const v=url.searchParams.get(n); return (v!==null && v!==undefined)? v : d; } catch(e){ return d; } }
+    function pick(){ for (var i=0;i<arguments.length;i++){ var v=getParam(arguments[i], ""); if(v!=="") return v; } return ""; }
 
+    // Inputs (support both old and new names)
+    const directText = getParam("text", "");
+    const nameField  = pick("q","name");        // المورد
+    const taxField   = pick("x","tax");         // الضريبة
+    const totalField = pick("dsd","total");     // الإجمالي شامل الضريبة
+    const dateField  = pick("z","date");        // التاريخ والوقت
+    const otherField = getParam("other", "");
+
+    const qrContent = directText !== "" ? directText : `${nameField}|${taxField}|${totalField}|${dateField}|${otherField}`;
+
+    const size = Math.max(64, Math.min(1024, parseInt(getParam("size", "350"))||350));
+    const out  = (getParam("out", "img")||"img").toLowerCase(); // img | data | base64
+
+    var qrDiv=document.createElement("div");
+    new QRCode(qrDiv,{text:qrContent,width:size,height:size});
+
+    function toPNG(){
+      const canvas = qrDiv.querySelector("canvas");
+      if(!canvas){ return null; }
+      return canvas.toDataURL("image/png");
+    }
+
+    setTimeout(()=>{
+      const pngURL = toPNG();
+      document.body.innerHTML="";
+      if(!pngURL){ document.body.textContent = "QR generation failed"; return; }
+
+      if(out === "img"){
+        const img=document.createElement("img");
+        img.src=pngURL;
+        img.width=size; img.height=size;
+        document.body.appendChild(img);
+      } else if(out === "base64"){
+        document.body.textContent = pngURL.split(",")[1] || "";
+      } else { // data
+        document.body.textContent = pngURL; // data:image/png;base64,...
+      }
+    }, 250);
+  </script>
+</body>
+</html>
